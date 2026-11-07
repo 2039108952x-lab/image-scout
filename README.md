@@ -1,224 +1,191 @@
 # image-scout
 
-**Give your AI agent eyes.**
+**Give your agent eyes.** Find a real photograph on the public web, download it, and prove
+it is a real image before the rest of your workflow touches it.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![MCP ready](https://img.shields.io/badge/MCP-ready-6f42c1)](https://modelcontextprotocol.io)
+[![DSH plugin](https://img.shields.io/badge/DSH-plugin-4b6bfb)](#install)
 [![No API key](https://img.shields.io/badge/API%20key-not%20required-brightgreen)](#)
-[![stars](https://img.shields.io/github/stars/2039108952x-lab/image-scout?style=social)](https://github.com/2039108952x-lab/image-scout/stargazers)
+[![Node](https://img.shields.io/badge/node-22%2B-339933)](package.json)
 
-> 让 AI Agent 在**不装任何依赖、不注册任何 API key** 的前提下，从公开图库找到真实图片并保存到本地。
->
-> 一个面向 MCP / Agent 的 **skill**（技能包）：把「搜索 → 拿候选 → 下载 → 校验」固化成可复用指令，
-> 让 Agent 不用每次现搓爬虫，也不会反复踩同一个坑。
+`image-scout` is a [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) plugin
+that bundles one agent skill and one zero-dependency Node.js CLI. It answers the question
+agents are bad at: *is this URL actually a photo, and can I trust it?*
 
----
+```console
+$ image-scout search --query "red telephone box" --limit 3
+SEARCH wikimedia: "red telephone box" -> 3 result(s)
+  1. File:Red telephone box, St Paul's Cathedral, London, England, GB, IMG 5182 edit.jpg  [JPEG 3608x5509]
+     license: CC0 - Christoph Braun
+     page:    https://commons.wikimedia.org/wiki/File:Red_telephone_box,_St_Paul%27s_Cathedral,…
+     image:   https://upload.wikimedia.org/wikipedia/commons/5/56/Red_telephone_box%2C_St_Paul…
 
-## 为什么
+$ image-scout download --from search --image-url "https://upload.wikimedia.org/…/Red_Telephone_Box_Defibrillator.jpg" \
+    --out output/reference/red-telephone-box-01.jpg --license "CC BY-SA 4.0 - Sebastiandoe5"
+VERIFY_OK: JPEG 5184x3888 10160640 bytes
+SAVED: output/reference/red-telephone-box-01.jpg
+META: output/reference/red-telephone-box-01.jpg.json
+```
 
-Agent 要"找一张图片"时，三种常见做法都有代价：
+## What it does
 
-| 做法 | 代价 |
+| Command | What it guarantees |
 |---|---|
-| 调 Unsplash / Pexels API | 注册 key、配额限制、图源单一 |
-| 爬搜索引擎图片结果 | 反爬、防盗链、拿到的常是缩略图或占位图 |
-| 每次让模型重写爬虫 | 同一个坑重踩一遍，还容易写出脆弱的代码 |
+| `search` | Queries the Wikimedia Commons or Openverse API; returns title, pixel size, licence, author, file page and direct image URL |
+| `list` | Fetches a page and extracts `<img>`, `srcset` and `og:image` candidates, with the full-size URL when it can derive it |
+| `download` | Downloads one URL, **refuses URLs that are not on the declared page**, then checks magic bytes, dimensions and file size before writing |
+| `verify` | Re-checks any file on disk with the same three checks |
 
-这个项目换了个思路：**不自己抓图，而是让 Agent 去读图库的搜索结果页**。
+No daemon, no cache directory, no config file, no API key, no npm dependencies.
 
-`web_fetch` 这类工具本来就会把 HTML 归约成文本，顺带把页面里的图片提取成候选列表；
-`import_web_image` 再校验"这张图是不是真在这页上"，然后落盘。
+## Install
 
-结果：**零依赖、零 key、授权信息随页面一起拿到**。
+### DeepSeek Harness (the plugin)
 
----
-
-## 核心链路
-
-```
-web_fetch（读页面 → 输出 Image candidates）
-      ↓
-import_web_image（校验候选真实性 + 格式，落盘）
-      ↓
-view_image（确认不是占位图）
+```bash
+dsh plugin --profile web add github:2039108952x-lab/image-scout
 ```
 
-三步之外没有隐藏步骤。没有 daemon、没有数据库、没有缓存目录、没有配置文件。
+Restart the profile (or wait for the skill watcher). The bundle registers a
+skill-filesystem provider pointing at its own `skills/` directory, so **`image-scout` is
+available immediately** — no copy into `~/.dsh/skills`, no config edit.
 
----
+Check it loaded:
 
-## 30 秒上手
+```bash
+dsh --profile web --dump-config | grep image-scout
+```
 
-### 前提
+Remove it again with `dsh plugin --profile web remove dsh-image-scout`.
 
-你的 Agent 需要三个能力（名字可能不同，功能对得上即可）：
+### Any other agent
 
-| 能力 | 作用 | 同类工具 |
-|---|---|---|
-| 读网页 | 抓 HTML 并提取图片候选 | `web_fetch` / `fetch` / `Scrape` |
-| 下载图片 | 校验并保存到本地 | `import_web_image` |
-| 看图 | 确认下到的是不是想要的 | `view_image` / 视觉模型 |
-
-### 安装
-
-把 `SKILL.md` 放进你 Agent 的技能目录即可。
-
-**Reasonix**
+The CLI is the interface; the skill file is the instructions. Both live in
+[`skills/image-scout/`](skills/image-scout/):
 
 ```bash
 git clone https://github.com/2039108952x-lab/image-scout.git
-cp -r image-scout "%APPDATA%\reasonix\skills\"
+node image-scout/skills/image-scout/scripts/image-scout.mjs search --query "mountain lake" --limit 5
 ```
 
-**Claude Code / 其它支持 skills 的客户端**
+- **Claude Code / Codex / Cursor**: point your skill directory at `skills/image-scout/`, or
+  copy it into `~/.claude/skills/`.
+- **Clients with `web_fetch` + `import_web_image` but no shell** (Reasonix): the original
+  tool-native instructions are preserved in [`legacy/reasonix/`](legacy/reasonix/SKILL.md).
 
-```bash
-cp -r image-scout ~/.claude/skills/
+> `image-scout` is a community plugin. It is not an official DeepSeek product and is not
+> affiliated with Wikimedia or Openverse.
+
+## Quick start
+
+```console
+$ image-scout search --query "cat portrait" --source openverse --limit 3
+SEARCH openverse: "cat portrait" -> 3 result(s)
+  1. Cat portrait  [image 1024x819]
+     license: BY-SA 2.0 - solarisgirl
+     page:    https://www.flickr.com/photos/7252160@N04/33533092025
+     image:   https://live.staticflickr.com/3679/33533092025_a4d3c17e1f_b.jpg
 ```
 
-**不支持的客户端**：直接把 `SKILL.md` 的内容贴进系统提示词或项目说明（如 `AGENTS.md`）。
-它本质就是一份可执行指令，不依赖特定平台。
+Pick a result, download it, keep the sidecar:
 
-> 注：技能文件内部的注册名是 `web-image-finder`，仓库名是 `image-scout`，两者指同一个东西。
-
-### 第一次使用
-
-```
-帮我找一张红色电话亭的图片
-```
-
-Agent 会：
-
-1. 抓 `https://commons.wikimedia.org/w/index.php?search=red%20telephone%20box&title=Special:MediaSearch&type=image`
-2. 从返回的 `Image candidates` 里挑一张
-3. `import_web_image(url=..., image_url=..., path="output/reference/red-telephone-box-01.jpg", alt=...)`
-4. `view_image` 确认
-5. 把图和许可信息一起给你
-
----
-
-## 图源
-
-| 图源 | 一跳到位 | 授权清晰 | 免 key | 高清 | 适合 |
-|---|:---:|:---:|:---:|:---:|---|
-| **Wikimedia Commons** | ✅ | ✅ | ✅ | 需进 File 页 | 通用首选、地标/人物/物件 |
-| **Openverse** | ❌ 两跳 | ✅✅ | ✅ | 取决原站 | 需要先看 license 再挑 |
-| **web_search 兜底** | ❌ | ❌ | 取决后端 | 不稳 | 前两个搜不到时 |
-
-### Wikimedia Commons
-
-```
-https://commons.wikimedia.org/w/index.php?search=<URL编码关键词>&title=Special:MediaSearch&type=image
+```console
+$ image-scout download --from search \
+    --image-url "https://live.staticflickr.com/3679/33533092025_a4d3c17e1f_b.jpg" \
+    --out output/reference/cat-01.jpg --license "BY-SA 2.0 - solarisgirl"
+VERIFY_OK: JPEG 1024x819 118343 bytes
+SAVED: output/reference/cat-01.jpg
 ```
 
-一次抓取拿到 30+ 候选。缩略图只有 120–330px，要高清得再进 File 详情页。
+If you found the image on a page instead, hand the page in and let the CLI re-check it:
 
-### Openverse
+```console
+$ image-scout list --page-url "https://commons.wikimedia.org/w/index.php?search=cat&title=Special:MediaSearch&type=image" --limit 5
+CANDIDATES: 5 (from https://commons.wikimedia.org/…)
+  1. https://upload.wikimedia.org/wikipedia/commons/thumb/…/250px-Cat.jpg
+     full: https://upload.wikimedia.org/wikipedia/commons/…/Cat.jpg
+     alt:  Cat sitting on a wall
 
-```
-https://api.openverse.org/v1/images/?q=<关键词>&page_size=20
-```
-
-返回 `license` / `license_url` / `attribution` / `creator` / `width` / `height`，
-是目前授权信息最完整的免费图源。代价是 API 给的直链不在任何页面上，下载要多跳一次。
-
----
-
-## 已踩过的坑（这也是这个项目存在的主要价值）
-
-### `import_web_image` 只认"页面上真实出现过的 URL"
-
-不是"能下载就行"，而是"这个字符串必须在这个页面的候选里出现过"。
-
-- 把 `330px-` 手改成 `1280px-` → `image_url is not an observed image on the source page`
-- 去掉 `?utm_campaign=index&utm_content=thumbnail` → 同样被拒
-- `path` 传绝对路径 → `valid relative image path and alt required`
-
-正确做法只有一个：**从 `web_fetch` 输出的 `Image candidates` 里整条复制**。
-
-### 搜索结果页 ≠ 高清
-
-Wikimedia 的 MediaSearch 结果页给的是缩略图。想要 960/1280/1920px，
-必须再抓一次 `File:` 详情页，用那一页给出的候选。
-
-### 动漫角色基本只有 cosplay
-
-公开图库对版权敏感，Re:Zero、原神这类角色的**官方立绘和动画截图不会出现在 Wikimedia**。
-能搜到的绝大多数是 cosplay 实拍。这不是工具的问题，是版权现实。
-
----
-
-## 和 ComfyUI 串联
-
-下载的图可以直接作为本地生成流程的输入：
-
-```python
-comfy_img2img(image="E:\\ai\\comfy UI\\output\\reference\\rem-01.jpg",
-              prompt="watercolor painting, soft palette",
-              denoise=0.5)
+$ image-scout download --page-url "https://commons.wikimedia.org/…" \
+    --image-url "https://upload.wikimedia.org/wikipedia/commons/…/Cat.jpg" --out output/reference/cat-02.jpg
 ```
 
-实测：960×1466 的照片直接喂 `comfy_img2img`，35.9 秒出 784×1200 结果，无需转格式。
+## Why not just fetch the URL?
 
-| 用途 | 工具 | 要点 |
+Because "downloaded" is not the same as "got an image". A consent wall, a 429 page, a
+hotlink-protection redirect and a 250 px thumbnail all return HTTP 200. `download`
+therefore checks, in order:
+
+1. **Provenance** — the URL must appear on the page you named (query strings and Wikimedia
+   thumb sizes are normalised, so the full-size URL of a listed thumb is accepted).
+2. **Magic bytes** — JPEG, PNG, GIF or WEBP signature; an HTML error page never passes.
+3. **Dimensions** — parsed from the header (`SOF` for JPEG, `IHDR` for PNG, the frame header
+   for GIF/WEBP) without decoding the pixels.
+4. **Size floor** — rejects tracking pixels and placeholders below `--min-bytes` (2 KB default).
+5. **Atomic write** — temp file + rename, so an interrupted download cannot leave a truncated
+   image that later looks valid.
+
+Anything else exits non-zero and writes nothing.
+
+## Sources and licences
+
+| Source | How | Notes |
 |---|---|---|
-| 换画风 / 保构图 | `comfy_img2img` | denoise 0.45–0.55 |
-| 用这张脸生成 | `comfy_face` | 正脸、脸占画面 ≥1/4、≥512px |
-| 改局部 | `comfy_inpaint` | `mask_rect=[x,y,w,h]` |
+| **Wikimedia Commons** | `--source wikimedia` (default) | Highest resolution, licence + author in the API response, mostly CC |
+| **Openverse** | `--source openverse` | Aggregates Flickr and others; check for `NC` (no commercial) and `ND` (no derivatives) |
+| **Any page** | `list` + `download --page-url` | Works on gallery and article pages; often only a thumbnail is embedded |
 
----
+Every download writes `<file>.json` with the source URL, licence (when passed with
+`--license`), dimensions and timestamp. Keep it — that is your attribution record. The
+image keeps its own licence; MIT here covers the code and the skill text only.
 
-## 目录结构
+## Layout
 
-```
+```text
 image-scout/
-├── SKILL.md            # 给 Agent 读的可执行指令（核心）
-├── README.md           # 本文件，给人读
-├── LICENSE             # MIT
-├── CHANGELOG.md        # 版本记录
-└── examples/
-    └── README.md       # 四个实测案例（真实 URL + 返回值）
+├── package.json            # dsh.bundle → cordis.patch.yml
+├── cordis.patch.yml        # registers the bundled skills/ directory
+├── lib/index.js             # package entry + skill-root resolver
+├── skills/image-scout/
+│   ├── SKILL.md             # what the agent reads
+│   └── scripts/image-scout.mjs   # the CLI (only node: builtins)
+├── test/                   # node:test, no network required
+├── legacy/reasonix/         # the v1 tool-native skill, kept for web_fetch clients
+├── release.json
+└── CHANGELOG.md
 ```
 
----
+## Requirements
 
-## 设计取舍
+- Node.js 22.19+ or 24+ (the CLI uses `parseArgs`, `fetch`-free `http`-level proxy support
+  and native ESM).
+- Outbound HTTPS to `commons.wikimedia.org`, `upload.wikimedia.org` and (optionally)
+  `api.openverse.org`. Behind a proxy, set `HTTPS_PROXY` or pass `--proxy`.
+- No dependencies. `npm install` installs nothing, because there is nothing to install.
 
-**为什么不做成可执行脚本？**
+## Troubleshooting
 
-因为"找图"的难点不在下载，在**判断**：挑哪张、许可是什么、什么时候该换源。
-这些判断只有模型能做，写死成脚本反而失去灵活性。
+| Symptom | Fix |
+|---|---|
+| `cannot reach … ECONNRESET` / timeout | Set `HTTPS_PROXY`, or pass `--proxy http://host:port` |
+| `HTTP 429` (Openverse) | Wait a minute, lower `--limit`, or use Wikimedia |
+| `REJECT: image_url is not present on …` | Copy the exact URL from the file page, or pass `--allow-unlisted` when you know the source |
+| `magic bytes are not JPEG/PNG/GIF/WEBP` | The server returned HTML (consent wall, error page); fetch with a browser and use `--html-file`, or pick another result |
+| `refusing private or loopback host` | SSRF guard; use a public URL, or `--allow-private-hosts` for trusted LAN sources |
+| Dimensions print `?x?` | Unusual header; the file is still valid, confirm visually |
 
-**为什么不内置图源列表？**
+Run `image-scout --help` for the full flag list; every command accepts `--json`.
 
-图源会变、会挂、会加反爬。skill 只固化了**策略**（先哪后哪、失败了怎么换），
-具体 URL 每次现拼，反而更抗变化。
+## 中文说明
 
-**为什么强调 `view_image` 校验？**
+[`README.zh.md`](README.zh.md) — 同样的内容，中文版，面向不想读英文的使用者。
 
-因为反爬页面、付费墙、防盗链都会让"下载成功"变成一个假象。看到的才算数。
+## Contributing
 
----
-
-## 已知限制
-
-- 需要 Agent 本身具备网页抓取和图片导入能力，纯文本模型用不了
-- Wikimedia 的摄影作品质量参差，不是图库级审美
-- Openverse 的部分图源（Flickr）需要两跳，慢
-- 不处理登录态、付费墙、验证码
-- 不保证图片的肖像权 / 商标权，商用需自行评估
-
----
-
-## 贡献
-
-发现新的图源、踩到新的坑，欢迎开 issue 或 PR。
-最有价值的贡献是**失败案例**——某个站点为什么抓不到、换了什么办法绕过去。
-
----
+Issues and PRs are welcome. The most useful report is a **failure case**: which page, which
+error, what you expected. The test suite runs offline (`npm test`); add a fixture when you
+fix an HTML-parsing bug.
 
 ## License
 
-MIT © 2026
-
-图片本身不适用本仓库的许可——每张图的授权以它源页面标注的为准。
+MIT © 2026. Images keep the licence their source states.

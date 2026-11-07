@@ -1,0 +1,10 @@
+# Registers the bundled image-scout skill directory with the host's skill registry.
+# The !!js expression is evaluated by the DSH host process (not by a sandbox) and
+# only resolves the package's own install path, so it needs no network or credentials.
+- insert:
+    - id: image-scout-skill-filesystem
+      name: '@deepseek-ai/dsh-skill-filesystem'
+      config:
+        providerName: image-scout-plugin
+        includeDefaultRoots: false
+        bundledSkillDir: !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-image-scout/package.json')), 'skills')

@@ -1,0 +1,9 @@
+node_modules/
+output/
+temp/
+*.log
+.DS_Store
+Thumbs.db
+
+# Local plugin-install sandboxes
+.dsh-test-home/

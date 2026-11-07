@@ -1,0 +1,56 @@
+{
+  "name": "dsh-image-scout",
+  "version": "2.0.0",
+  "description": "Give your DSH agent eyes: search Wikimedia Commons and Openverse, download a real photo, and verify it is a real image before you use it.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "skills",
+    "README.md",
+    "README.zh.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "release.json"
+  ],
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "agent-skill",
+    "image-search",
+    "image-download",
+    "wikimedia",
+    "openverse",
+    "reference-images",
+    "comfyui"
+  ],
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "scripts": {
+    "test": "node --test test/image-scout.test.mjs",
+    "test:network": "node test/network.test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2039108952x-lab/image-scout.git"
+  },
+  "homepage": "https://github.com/2039108952x-lab/image-scout#readme",
+  "bugs": {
+    "url": "https://github.com/2039108952x-lab/image-scout/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

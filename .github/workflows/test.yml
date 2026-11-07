@@ -1,0 +1,32 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22.19", "24"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Check CLI syntax
+        run: node --check skills/image-scout/scripts/image-scout.mjs
+      - name: Unit tests (offline)
+        run: npm test
+      - name: Package contents
+        run: |
+          npm pack --dry-run 2>&1 | tee /tmp/pack.txt
+          grep -q "skills/image-scout/SKILL.md" /tmp/pack.txt
+          grep -q "cordis.patch.yml" /tmp/pack.txt
