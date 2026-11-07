@@ -21,7 +21,7 @@
 - 退出码约定：`0` 成功、`1` 用法、`2` 网络、`3` 校验、`4` 来源、`5` 策略
 - DSH 插件包：`package.json` 声明 `dsh.bundle`，`cordis.patch.yml` 注册自带 `skills/`，
   `lib/index.js` 暴露技能根目录解析
-- `test/image-scout.test.mjs`：21 个离线测试（HTML 解析、魔数、尺寸、来源、SSRF、代理、CLI）
+- `test/image-scout.test.mjs` + `test/skill.test.mjs`：25 个离线测试（HTML 解析、魔数、尺寸、来源、SSRF、代理、CLI、skill frontmatter 与版本一致性）
 - `.github/workflows/test.yml`：Node 22 / 24 运行测试
 - `README.zh.md` 中文 README；`examples/` 换成 v2 真实运行记录
 

@@ -34,7 +34,7 @@
     "node": "^22.19.0 || >=24.0.0"
   },
   "scripts": {
-    "test": "node --test test/image-scout.test.mjs"
+    "test": "node --test test/image-scout.test.mjs test/skill.test.mjs"
   },
   "repository": {
     "type": "git",

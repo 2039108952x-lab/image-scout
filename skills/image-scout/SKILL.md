@@ -7,7 +7,7 @@ license: MIT
 
 # image-scout
 
-Real photos, not generated ones. Three commands, no API key, no npm dependencies —
+Real photos, not generated ones. Four commands, no API key, no npm dependencies —
 the bundled CLI uses only Node.js builtins and works on Windows, macOS and Linux.
 
 ## When to use it
