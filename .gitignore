@@ -7,3 +7,5 @@ Thumbs.db
 
 # Local plugin-install sandboxes
 .dsh-test-home/
+
+*.tgz
