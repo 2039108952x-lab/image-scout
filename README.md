@@ -95,6 +95,12 @@ it keeps working only while pnpm's store holds a copy and fails with an integrit
 mismatch as soon as the store is cleared or the machine changes. Reinstall with the
 npm or `github:` command above.
 
+**Already have the standalone skill?** The plugin registers the skill as `image-scout`.
+DSH ranks a `customSkillDirs` entry (**300**) ahead of a bundled one (**600**) — lower wins —
+so any copy still named `image-scout` in your own skill directory shadows this plugin.
+Rename that copy's frontmatter (e.g. to `image-scout-v1`) or move it out of
+`customSkillDirs`; the plugin then provides `image-scout`.
+
 ### Any other agent
 
 The CLI is the interface; the skill file is the instructions. Both live in

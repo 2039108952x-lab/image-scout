@@ -87,6 +87,11 @@ Windows 上两种环境问题值得先知道，别先怀疑插件：
 只靠 pnpm store 里的缓存才能跑；store 一清或换机器就会 integrity mismatch。用上面的
 npm 或 `github:` 命令重装即可。
 
+**之前手动装过独立版技能？** 插件注册的技能名就是 `image-scout`。dsh 的排序是
+`customSkillDirs`（**300**）优先于 bundled（**600**）——**数字越小越优先**，所以你自己目录里
+还叫 `image-scout` 的那份会压住插件。把那份 frontmatter 改名（例如 `image-scout-v1`），
+或把它移出 `customSkillDirs`，`image-scout` 就由插件提供。
+
 ### 其它 Agent
 
 CLI 是接口，SKILL.md 是指令，两者都在 [`skills/image-scout/`](skills/image-scout/)：

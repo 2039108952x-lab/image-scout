@@ -2,6 +2,15 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [Unreleased]
+
+### 文档
+
+- 更正技能优先级说明：dsh 的 rank **数字越小越优先**，`customSkillDirs`（300）排在
+  bundled 技能（600）**前面**。因此用户自己的技能目录里若还留着 frontmatter 名为
+  `image-scout` 的 v1 副本，会压住插件里的 v2。README 两版都加了「已有独立版技能？」
+  的处置说明（改名为 `image-scout-v1` 或移出 `customSkillDirs`）。
+
 ## [2.0.2] — 2026-11-07
 
 **npm 正式发布。** 纯文档/元数据版本，没有 CLI 行为变化；发布本版是为了让「版本 → 字节」
