@@ -1,6 +1,6 @@
 {
   "name": "dsh-image-scout",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Give your DSH agent eyes: search Wikimedia Commons and Openverse, download a real photo, and verify it is a real image before you use it.",
   "license": "MIT",
   "type": "module",

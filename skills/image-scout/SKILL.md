@@ -1,7 +1,7 @@
 ---
 name: image-scout
 description: Find a real photograph on the public web, download it to disk, and prove it is a real image. Searches Wikimedia Commons and Openverse, follows a page's candidate list, and verifies magic bytes, dimensions and size before handing the file to the rest of the workflow. Use when the user asks to 找一张 xx 的图片 / 找图 / 下载参考图 / 搜几张素材 / 给我真实照片（不是 AI 生成）, or when a ComfyUI img2img, face-swap or inpainting job needs a real source photo.
-version: 2.0.0
+version: 2.0.1
 license: MIT
 ---
 

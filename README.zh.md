@@ -41,7 +41,8 @@ META: output/reference/red-telephone-box-01.jpg.json
 ### DeepSeek Harness（插件方式）
 
 ```bash
-dsh plugin --profile web add github:2039108952x-lab/image-scout
+# 钉住发布 tag，重装结果可复现
+dsh plugin --profile web add github:2039108952x-lab/image-scout#v2.0.1
 ```
 
 重启 profile（或等 skill watcher）。插件会注册一个 skill-filesystem provider 指向自己的
@@ -55,19 +56,19 @@ dsh --profile web --dump-config | grep image-scout
 
 卸载：`dsh plugin --profile web remove dsh-image-scout`。
 
-国内或需要代理的网络里，pnpm 和 `git ls-remote` 也要能连上 GitHub。**先导出小写环境变量再装**
-（pnpm / git 只认小写形式；大写 `HTTPS_PROXY` 对 pnpm 拉包不生效）：
+Windows 上两种环境问题值得先知道，别先怀疑插件：
 
-```powershell
-$env:https_proxy='http://127.0.0.1:7897'; $env:http_proxy=$env:https_proxy
-dsh plugin --profile web add github:2039108952x-lab/image-scout
-```
+| 现象 | 原因 | 处理 |
+|---|---|---|
+| `ERR_PNPM_MISSING_TARBALL_INTEGRITY` | dsh 的 profile 固定用 `nodeLinker: hoisted`；pnpm 11.7 给**裸远程 tarball URL** 写 lockfile 时不写 `integrity`，随后自己又拒绝这条记录。只有 `add https://…/x.tgz` 这种装法会踩到，`github:` 和本地文件都不会。 | 用上面的 `github:` 装法，或装本地 `.tgz`（见下）。 |
+| `fetch failed` / `ECONNREFUSED` | GitHub 需要代理 | 用**小写**环境变量导出：`$env:https_proxy='http://127.0.0.1:7897'; $env:http_proxy=$env:https_proxy`（pnpm 和 `git ls-remote` 只认小写） |
 
-还不行就装磁盘上的预构建包（已在干净 profile 上验证）：从
-[Release](https://github.com/2039108952x-lab/image-scout/releases/tag/v2.0.0) 下载
-`dsh-image-scout-2.0.0.tgz`，执行 `dsh plugin --profile web add C:\path\to\dsh-image-scout-2.0.0.tgz`。
-直接给远程 tarball URL（`add https://github.com/.../dsh-image-scout-2.0.0.tgz`）也能用，
-但 pnpm 取它时不走环境代理，是国内最不稳的一种。
+本地文件兜底（已在干净 profile 验证）：从
+[Release](https://github.com/2039108952x-lab/image-scout/releases/tag/v2.0.1) 下载
+`dsh-image-scout-2.0.1.tgz`，执行 `dsh plugin --profile web add C:\path\to\dsh-image-scout-2.0.1.tgz`。
+
+npm registry 版本在计划中（`dsh plugin --profile web add dsh-image-scout@2.0.1`）；
+npm 发布不可变，能彻底绕开上面的 tarball 问题。在那之前，`github:` 是受支持的装法。
 
 ### 其它 Agent
 

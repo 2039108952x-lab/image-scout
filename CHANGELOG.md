@@ -2,6 +2,26 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.0.1] — 2026-11-07
+
+**安装说明纠错 + 发布可复现。** 没有 CLI 行为变化；升级是为了让安装路径可靠、文档与事实一致，
+并让"版本 → 字节"从此不可变。
+
+### 修复
+
+- 文档曾把 `ERR_PNPM_MISSING_TARBALL_INTEGRITY` 归因于代理。真实根因是 DSH profile 固定
+  `nodeLinker: hoisted`：pnpm 11.7 给**裸远程 tarball URL** 写 lockfile 时不写 `integrity`，
+  随后又拒绝这条自制记录。`README.md`、`README.zh.md` 与 `docs/DSH_INSTALL.md` 已按真实根因
+  重写；推荐 `github:…#v2.0.1`（钉 tag）或本地 `.tgz`，远程 tarball 不再作为推荐装法。
+- `examples/README.md` 的版本标记同步为 `v2.0.1`。
+
+### 变更
+
+- 发布资产从本版起不可变：上传后不再 `--clobber`。2.0.0 的 release 资产被覆盖过两次，
+  同一版本对应了不同字节，已装用户的 lockfile `integrity` 无法再匹配资产——这是发布 2.0.1
+  的直接原因。
+- npm registry 发布列入计划；npm 版本不可变，可彻底绕开 hoisted + 裸 tarball 的问题。
+
 ## [2.0.0] — 2026-11-07
 
 **从"提示词模板"变成"可执行的下载器"。** v1 依赖宿主内建工具；v2 自带一个零依赖 CLI，

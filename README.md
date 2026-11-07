@@ -43,7 +43,8 @@ No daemon, no cache directory, no config file, no API key, no npm dependencies.
 ### DeepSeek Harness (the plugin)
 
 ```bash
-dsh plugin --profile web add github:2039108952x-lab/image-scout
+# Pin a release tag so reinstalls stay reproducible.
+dsh plugin --profile web add github:2039108952x-lab/image-scout#v2.0.1
 ```
 
 Restart the profile (or wait for the skill watcher). The bundle registers a
@@ -58,23 +59,22 @@ dsh --profile web --dump-config | grep image-scout
 
 Remove it again with `dsh plugin --profile web remove dsh-image-scout`.
 
-Behind a proxy (mainland China and similar networks) pnpm has to reach GitHub
-too — export the proxy in lower case before installing, because that is the form
-pnpm and `git ls-remote` read:
+Two environment problems show up on Windows and are worth knowing before you
+blame the plugin:
 
-```bash
-export https_proxy=http://127.0.0.1:7897 http_proxy=http://127.0.0.1:7897   # bash
-$env:https_proxy='http://127.0.0.1:7897'; $env:http_proxy=$env:https_proxy    # PowerShell
-dsh plugin --profile web add github:2039108952x-lab/image-scout
-```
+| Symptom | Cause | Fix |
+|---|---|---|
+| `ERR_PNPM_MISSING_TARBALL_INTEGRITY` | DSH profiles set `nodeLinker: hoisted`; pnpm 11.7 writes no `integrity` for a **bare remote tarball URL** and then rejects its own lockfile entry. Only the `add https://…/x.tgz` install form hits this — `github:` and local files are unaffected. | Use the `github:` form above, or install a local `.tgz` (see below). |
+| `fetch failed` / `ECONNREFUSED` | GitHub needs the proxy | Export it in **lower case** — pnpm and `git ls-remote` read `https_proxy` / `http_proxy`, not the upper-case spelling: `$env:https_proxy='http://127.0.0.1:7897'; $env:http_proxy=$env:https_proxy` |
 
-If that still fails, install the prebuilt tarball from disk (verified on a clean
-profile): download `dsh-image-scout-2.0.0.tgz` from the
-[release](https://github.com/2039108952x-lab/image-scout/releases/tag/v2.0.0),
-then run `dsh plugin --profile web add C:\path\to\dsh-image-scout-2.0.0.tgz`.
-A remote tarball URL (`add https://github.com/.../dsh-image-scout-2.0.0.tgz`)
-also works, but pnpm fetches it without the environment proxy, so it is the
-least reliable of the three behind a proxy.
+Local-file fallback (verified on a clean profile): download
+`dsh-image-scout-2.0.1.tgz` from the
+[release](https://github.com/2039108952x-lab/image-scout/releases/tag/v2.0.1) and run
+`dsh plugin --profile web add C:\path\to\dsh-image-scout-2.0.1.tgz`.
+
+A registry build is planned (`dsh plugin --profile web add dsh-image-scout@2.0.1`);
+npm publishes are immutable, so they sidestep the tarball bug completely. Until
+then the `github:` form is the supported path.
 
 ### Any other agent
 
