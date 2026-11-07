@@ -2,6 +2,30 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.0.2] — 2026-11-07
+
+**npm 正式发布。** 纯文档/元数据版本，没有 CLI 行为变化；发布本版是为了让「版本 → 字节」
+在两个分发渠道上都是同一份。
+
+### 新增
+
+- 发布到 npm registry：`dsh plugin --profile web add dsh-image-scout@2.0.2` 成为首选装法。
+  registry 元数据自带 `integrity`，不再走「pnpm 给裸 tarball 自己算 integrity」那一步，
+  dsh profile 的 `nodeLinker: hoisted` 因此没有机会触发
+  `ERR_PNPM_MISSING_TARBALL_INTEGRITY`。
+- 本版的 GitHub Release 资产与 npm 包由同一个 commit 打出（`npm pack` 字节一致），
+  不再出现同一版本号两种字节。
+
+### 变更
+
+- `README.md` / `README.zh.md` 安装段改为 npm 优先；`github:…#v2.0.2`（钉 tag）与本地
+  `.tgz` 作为备选，`add https://…tgz` 明确标为不推荐。
+- `examples/README.md` 的版本标记同步为 `v2.0.2`。
+
+### 修复
+
+- 无。
+
 ## [2.0.1] — 2026-11-07
 
 **安装说明纠错 + 发布可复现。** 没有 CLI 行为变化；升级是为了让安装路径可靠、文档与事实一致，

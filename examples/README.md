@@ -2,7 +2,7 @@
 
 Every block below was copied from an actual terminal session, not written by hand.
 Network: Windows 11, `HTTPS_PROXY=http://127.0.0.1:7897` (Wikimedia and Openverse are
-not directly reachable from this host). CLI: `v2.0.1` (recorded on 2.0.0; no CLI change since).
+not directly reachable from this host). CLI: `v2.0.2` (recorded on 2.0.0; no CLI change since).
 
 Run them yourself with:
 

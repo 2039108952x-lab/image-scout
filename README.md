@@ -43,8 +43,18 @@ No daemon, no cache directory, no config file, no API key, no npm dependencies.
 ### DeepSeek Harness (the plugin)
 
 ```bash
+dsh plugin --profile web add dsh-image-scout@2.0.2
+```
+
+The registry copy is immutable and ships its own `integrity` metadata, so it installs
+cleanly under the `nodeLinker: hoisted` setting DSH profiles use — the failure mode that
+bare remote tarball URLs hit does not apply here.
+
+Prefer a git checkout? The pinned-tag form works too:
+
+```bash
 # Pin a release tag so reinstalls stay reproducible.
-dsh plugin --profile web add github:2039108952x-lab/image-scout#v2.0.1
+dsh plugin --profile web add github:2039108952x-lab/image-scout#v2.0.2
 ```
 
 Restart the profile (or wait for the skill watcher). The bundle registers a
@@ -64,25 +74,20 @@ blame the plugin:
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `ERR_PNPM_MISSING_TARBALL_INTEGRITY` | DSH profiles set `nodeLinker: hoisted`; pnpm 11.7 writes no `integrity` for a **bare remote tarball URL** and then rejects its own lockfile entry. Only the `add https://…/x.tgz` install form hits this — `github:` and local files are unaffected. | Use the `github:` form above, or install a local `.tgz` (see below). |
+| `ERR_PNPM_MISSING_TARBALL_INTEGRITY` | DSH profiles set `nodeLinker: hoisted`; pnpm 11.7 writes no `integrity` for a **bare remote tarball URL** and then rejects its own lockfile entry. Only the `add https://…/x.tgz` install form hits this — npm specs, `github:` and local files are unaffected. | Use the npm or `github:` form above, or install a local `.tgz` (see below). |
 | `fetch failed` / `ECONNREFUSED` | GitHub needs the proxy | Export it in **lower case** — pnpm and `git ls-remote` read `https_proxy` / `http_proxy`, not the upper-case spelling: `$env:https_proxy='http://127.0.0.1:7897'; $env:http_proxy=$env:https_proxy` |
 
 Local-file fallback (verified on a clean profile): download
-`dsh-image-scout-2.0.1.tgz` from the
-[release](https://github.com/2039108952x-lab/image-scout/releases/tag/v2.0.1) and run
-`dsh plugin --profile web add C:\path\to\dsh-image-scout-2.0.1.tgz`.
-
-A registry build is planned (`dsh plugin --profile web add dsh-image-scout@2.0.1`);
-npm publishes are immutable, so they sidestep the tarball bug completely. Until
-then the `github:` form is the supported path.
+`dsh-image-scout-2.0.2.tgz` from the
+[release](https://github.com/2039108952x-lab/image-scout/releases/tag/v2.0.2) and run
+`dsh plugin --profile web add C:\path\to\dsh-image-scout-2.0.2.tgz`.
 
 **Upgrading from a tarball install?** The v2.0.0 release asset was overwritten twice
 (26,733 B → 26,759 B) and has been withdrawn — the tag stays, the asset is gone. An
 old lockfile that pinned it records an `integrity` for bytes that no longer exist, so
 it keeps working only while pnpm's store holds a copy and fails with an integrity
 mismatch as soon as the store is cleared or the machine changes. Reinstall with the
-`github:` command above; it writes `gitHosted: true`, a pnpm-computed integrity, and a
-commit-pinned codeload URL into the lockfile, which is stable under `hoisted`.
+npm or `github:` command above.
 
 ### Any other agent
 
