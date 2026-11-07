@@ -55,6 +55,20 @@ dsh --profile web --dump-config | grep image-scout
 
 卸载：`dsh plugin --profile web remove dsh-image-scout`。
 
+国内或需要代理的网络里，pnpm 和 `git ls-remote` 也要能连上 GitHub。**先导出小写环境变量再装**
+（pnpm / git 只认小写形式；大写 `HTTPS_PROXY` 对 pnpm 拉包不生效）：
+
+```powershell
+$env:https_proxy='http://127.0.0.1:7897'; $env:http_proxy=$env:https_proxy
+dsh plugin --profile web add github:2039108952x-lab/image-scout
+```
+
+还不行就装磁盘上的预构建包（已在干净 profile 上验证）：从
+[Release](https://github.com/2039108952x-lab/image-scout/releases/tag/v2.0.0) 下载
+`dsh-image-scout-2.0.0.tgz`，执行 `dsh plugin --profile web add C:\path\to\dsh-image-scout-2.0.0.tgz`。
+直接给远程 tarball URL（`add https://github.com/.../dsh-image-scout-2.0.0.tgz`）也能用，
+但 pnpm 取它时不走环境代理，是国内最不稳的一种。
+
 ### 其它 Agent
 
 CLI 是接口，SKILL.md 是指令，两者都在 [`skills/image-scout/`](skills/image-scout/)：

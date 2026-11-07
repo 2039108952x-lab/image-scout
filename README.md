@@ -58,6 +58,24 @@ dsh --profile web --dump-config | grep image-scout
 
 Remove it again with `dsh plugin --profile web remove dsh-image-scout`.
 
+Behind a proxy (mainland China and similar networks) pnpm has to reach GitHub
+too — export the proxy in lower case before installing, because that is the form
+pnpm and `git ls-remote` read:
+
+```bash
+export https_proxy=http://127.0.0.1:7897 http_proxy=http://127.0.0.1:7897   # bash
+$env:https_proxy='http://127.0.0.1:7897'; $env:http_proxy=$env:https_proxy    # PowerShell
+dsh plugin --profile web add github:2039108952x-lab/image-scout
+```
+
+If that still fails, install the prebuilt tarball from disk (verified on a clean
+profile): download `dsh-image-scout-2.0.0.tgz` from the
+[release](https://github.com/2039108952x-lab/image-scout/releases/tag/v2.0.0),
+then run `dsh plugin --profile web add C:\path\to\dsh-image-scout-2.0.0.tgz`.
+A remote tarball URL (`add https://github.com/.../dsh-image-scout-2.0.0.tgz`)
+also works, but pnpm fetches it without the environment proxy, so it is the
+least reliable of the three behind a proxy.
+
 ### Any other agent
 
 The CLI is the interface; the skill file is the instructions. Both live in
