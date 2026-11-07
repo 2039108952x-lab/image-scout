@@ -47,6 +47,12 @@ dsh plugin --profile web add dsh-image-scout@2.0.2
 registry 上的版本不可变，且带自己的 `integrity` 元数据，所以在 dsh profile 的
 `nodeLinker: hoisted` 下能直接装上——裸远程 tarball URL 那个坑不会出现。
 
+`2.0.2` 已于 2026-11-07 发布并成为 `latest`：registry tarball 28,461 B
+（sha256 `d2af2746…`），与
+[v2.0.2 Release 资产](https://github.com/2039108952x-lab/image-scout/releases/tag/v2.0.2)
+逐字节相同。可以自己核验：`npm view dsh-image-scout@2.0.2 dist.integrity`；
+完整发版流程写在 [RELEASING.md](RELEASING.md)。
+
 想要 git 检出也行，钉 tag 的装法同样可用：
 
 ```bash

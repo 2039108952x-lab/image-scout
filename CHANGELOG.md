@@ -15,6 +15,11 @@
   `ERR_PNPM_MISSING_TARBALL_INTEGRITY`。
 - 本版的 GitHub Release 资产与 npm 包由同一个 commit 打出（`npm pack` 字节一致），
   不再出现同一版本号两种字节。
+- 发布记录（2026-11-07）：`dsh-image-scout@2.0.2` 已是 npm `latest`。registry 上的
+  tarball 与 Release 资产均为 **28,461 B**、sha256 `d2af2746…`；
+  `dist.integrity = sha512-LYlhxjkvXoV/6YOkxETTUGCKLwM1ttVJYtHAt73cBF8hgtKZ0XoMmUvGI1oZOnbQYZ3OMhoI7Ek9wrff5aIH9Q==`。
+  三个 profile（web / desktop / 干净 npmtest，`nodeLinker: hoisted`）都用
+  `dsh plugin add dsh-image-scout@2.0.2` 装过，1.1–2.7s 完成，lockfile 只有 `integrity`、没有 `tarball`。
 
 ### 变更
 

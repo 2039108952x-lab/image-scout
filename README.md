@@ -50,6 +50,12 @@ The registry copy is immutable and ships its own `integrity` metadata, so it ins
 cleanly under the `nodeLinker: hoisted` setting DSH profiles use — the failure mode that
 bare remote tarball URLs hit does not apply here.
 
+`2.0.2` was published on 2026-11-07 and is `latest`: the registry tarball is 28,461 B
+(sha256 `d2af2746…`) and byte-identical to the
+[v2.0.2 release asset](https://github.com/2039108952x-lab/image-scout/releases/tag/v2.0.2).
+Check it yourself with `npm view dsh-image-scout@2.0.2 dist.integrity`; the release
+procedure is documented in [RELEASING.md](RELEASING.md).
+
 Prefer a git checkout? The pinned-tag form works too:
 
 ```bash

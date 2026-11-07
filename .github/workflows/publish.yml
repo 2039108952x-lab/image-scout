@@ -1,0 +1,53 @@
+name: publish
+
+# Publishes the package to npm with provenance.
+#
+# Preferred path: npm trusted publishing (OIDC). No token is stored in the repo or
+# in GitHub secrets; npm exchanges the workflow's OIDC identity for a short-lived
+# publish credential. Configure it once at
+#   https://www.npmjs.com/package/dsh-image-scout/access  ->  Trusted Publisher
+# with these exact values:
+#   Provider: GitHub Actions
+#   Organization or user: 2039108952x-lab
+#   Repository: image-scout
+#   Workflow filename: publish.yml
+#   Environment: (leave empty)
+#
+# Until that is configured, run this workflow manually only after exporting a
+# publish-capable token, or publish from a workstation (see RELEASING.md).
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      # Deliberately no `registry-url`: setup-node would write an .npmrc that
+      # points at a token placeholder, and npm would then skip the OIDC exchange.
+      - name: Verify the tag matches package.json
+        run: |
+          node -e '
+            const pkg = require("./package.json");
+            const ref = process.env.GITHUB_REF || "";
+            if (ref.startsWith("refs/tags/v") && ref !== `refs/tags/v${pkg.version}`) {
+              console.error(`tag ${ref} does not match package.json version ${pkg.version}`);
+              process.exit(1);
+            }
+            console.log(`publishing ${pkg.name}@${pkg.version}`);
+          '
+      - name: Unit tests (offline)
+        run: npm test
+      - name: Publish with provenance
+        run: npm publish --provenance --access public
