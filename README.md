@@ -76,6 +76,14 @@ A registry build is planned (`dsh plugin --profile web add dsh-image-scout@2.0.1
 npm publishes are immutable, so they sidestep the tarball bug completely. Until
 then the `github:` form is the supported path.
 
+**Upgrading from a tarball install?** The v2.0.0 release asset was overwritten twice
+(26,733 B → 26,759 B) and has been withdrawn — the tag stays, the asset is gone. An
+old lockfile that pinned it records an `integrity` for bytes that no longer exist, so
+it keeps working only while pnpm's store holds a copy and fails with an integrity
+mismatch as soon as the store is cleared or the machine changes. Reinstall with the
+`github:` command above; it writes `gitHosted: true`, a pnpm-computed integrity, and a
+commit-pinned codeload URL into the lockfile, which is stable under `hoisted`.
+
 ### Any other agent
 
 The CLI is the interface; the skill file is the instructions. Both live in

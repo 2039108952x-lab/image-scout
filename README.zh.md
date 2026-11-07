@@ -70,6 +70,12 @@ Windows 上两种环境问题值得先知道，别先怀疑插件：
 npm registry 版本在计划中（`dsh plugin --profile web add dsh-image-scout@2.0.1`）；
 npm 发布不可变，能彻底绕开上面的 tarball 问题。在那之前，`github:` 是受支持的装法。
 
+**从 tarball 装法升级？** v2.0.0 的 release 资产被覆盖过两次（26,733 B → 26,759 B），
+已撤回——tag 保留，资产删除。旧 lockfile 里记录的 `integrity` 对应的是已经不存在的字节，
+只靠 pnpm store 里的缓存才能跑；store 一清或换机器就会 integrity mismatch。用上面的
+`github:` 命令重装即可：它写进 lockfile 的是 `gitHosted: true` + pnpm 自己算的 integrity +
+钉在 commit 上的 codeload URL，在 `hoisted` 下稳定。
+
 ### 其它 Agent
 
 CLI 是接口，SKILL.md 是指令，两者都在 [`skills/image-scout/`](skills/image-scout/)：

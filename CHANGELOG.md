@@ -20,6 +20,10 @@
 - 发布资产从本版起不可变：上传后不再 `--clobber`。2.0.0 的 release 资产被覆盖过两次，
   同一版本对应了不同字节，已装用户的 lockfile `integrity` 无法再匹配资产——这是发布 2.0.1
   的直接原因。
+- **v2.0.0 的 release 已撤回（保留 tag）**：远端资产 26,759 B / sha512 `qQ1Hx…`，与当初
+  两个 profile 固定下来的 26,733 B / sha512 `+FBWl…` 不是同一份。旧字节只存在于 pnpm store，
+  store 一清或换机就会 integrity mismatch；留着只会让人下载到不可信的字节。代码历史仍在
+  `v2.0.0` tag（`2622e5f`）上，需要旧代码请 `git checkout v2.0.0`。
 - npm registry 发布列入计划；npm 版本不可变，可彻底绕开 hoisted + 裸 tarball 的问题。
 
 ## [2.0.0] — 2026-11-07
