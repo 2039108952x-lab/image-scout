@@ -1,7 +1,7 @@
 ---
 name: web-image-finder
 description: 在网上找真实图片并下载到本地。当用户要「找一张 xx 的图」「下载参考图」「搜几张素材」「给我真实照片（不是 AI 生成）」时使用。链路是 搜索 → 抓图库页 → 下载 → 校验，下载后可直接喂给 ComfyUI 做图生图/换脸/重绘。
-version: 1.1.0
+version: 1.2.0
 license: MIT
 ---
 

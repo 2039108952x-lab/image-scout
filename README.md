@@ -1,28 +1,35 @@
-# web-image-finder
+# image-scout
+
+**Give your AI agent eyes.**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![MCP ready](https://img.shields.io/badge/MCP-ready-6f42c1)](https://modelcontextprotocol.io)
+[![No API key](https://img.shields.io/badge/API%20key-not%20required-brightgreen)](#)
+[![stars](https://img.shields.io/github/stars/2039108952x-lab/image-scout?style=social)](https://github.com/2039108952x-lab/image-scout/stargazers)
 
 > 让 AI Agent 在**不装任何依赖、不注册任何 API key** 的前提下，从公开图库找到真实图片并保存到本地。
-
-一个面向 MCP / Agent 的 **skill**（技能包）：把「搜索 → 拿候选 → 下载 → 校验」这条链路固化成可复用的指令，
-让 Agent 不用每次现搓代码，也不会再踩同样的坑。
+>
+> 一个面向 MCP / Agent 的 **skill**（技能包）：把「搜索 → 拿候选 → 下载 → 校验」固化成可复用指令，
+> 让 Agent 不用每次现搓爬虫，也不会反复踩同一个坑。
 
 ---
 
-## 它解决什么问题
+## 为什么
 
-Agent 要"找一张图片"时，常见的三种做法都有代价：
+Agent 要"找一张图片"时，三种常见做法都有代价：
 
-| 做法 | 问题 |
+| 做法 | 代价 |
 |---|---|
-| 调 Unsplash / Pexels API | 要注册 key、有配额、图源单一 |
+| 调 Unsplash / Pexels API | 注册 key、配额限制、图源单一 |
 | 爬搜索引擎图片结果 | 反爬、防盗链、拿到的常是缩略图或占位图 |
-| 让模型自己写爬虫 | 每个会话重写一遍，坑重踩一遍 |
+| 每次让模型重写爬虫 | 同一个坑重踩一遍，还容易写出脆弱的代码 |
 
-这个 skill 换了个思路：**不自己抓图，而是让 Agent 去读图库的搜索结果页**。
+这个项目换了个思路：**不自己抓图，而是让 Agent 去读图库的搜索结果页**。
 
-`web_fetch` 这类工具本来就会把 HTML 归约成文本，同时把页面里的图片提取成候选列表；
-`import_web_image` 再做一次"这图是不是真在这页上"的校验，然后落盘。
+`web_fetch` 这类工具本来就会把 HTML 归约成文本，顺带把页面里的图片提取成候选列表；
+`import_web_image` 再校验"这张图是不是真在这页上"，然后落盘。
 
-结果就是：**零依赖、零 key、授权信息随页面一起拿到**。
+结果：**零依赖、零 key、授权信息随页面一起拿到**。
 
 ---
 
@@ -36,21 +43,21 @@ import_web_image（校验候选真实性 + 格式，落盘）
 view_image（确认不是占位图）
 ```
 
-三步之外没有隐藏步骤。没有 daemon、没有数据库、没有缓存目录。
+三步之外没有隐藏步骤。没有 daemon、没有数据库、没有缓存目录、没有配置文件。
 
 ---
 
-## 快速开始
+## 30 秒上手
 
 ### 前提
 
-你的 Agent 需要具备三个能力（名字可能不同，功能对得上即可）：
+你的 Agent 需要三个能力（名字可能不同，功能对得上即可）：
 
 | 能力 | 作用 | 同类工具 |
 |---|---|---|
 | 读网页 | 抓 HTML 并提取图片候选 | `web_fetch` / `fetch` / `Scrape` |
 | 下载图片 | 校验并保存到本地 | `import_web_image` |
-| 看图 | 确认下到的是不是想要的 | `view_image` / vision 模型 |
+| 看图 | 确认下到的是不是想要的 | `view_image` / 视觉模型 |
 
 ### 安装
 
@@ -59,30 +66,28 @@ view_image（确认不是占位图）
 **Reasonix**
 
 ```bash
-cp -r web-image-finder "%APPDATA%\reasonix\skills\"
-# 或加进 config.toml
-# [skills]
-# paths = ["<你的 skills 目录>"]
+git clone https://github.com/2039108952x-lab/image-scout.git
+cp -r image-scout "%APPDATA%\reasonix\skills\"
 ```
 
 **Claude Code / 其它支持 skills 的客户端**
 
 ```bash
-cp -r web-image-finder ~/.claude/skills/
+cp -r image-scout ~/.claude/skills/
 ```
 
-**不支持的客户端**：直接把 `SKILL.md` 的内容贴进系统提示词或项目说明文件（如 `AGENTS.md`），
-它本质就是一份可执行的指令，不依赖特定平台。
+**不支持的客户端**：直接把 `SKILL.md` 的内容贴进系统提示词或项目说明（如 `AGENTS.md`）。
+它本质就是一份可执行指令，不依赖特定平台。
+
+> 注：技能文件内部的注册名是 `web-image-finder`，仓库名是 `image-scout`，两者指同一个东西。
 
 ### 第一次使用
-
-对 Agent 说：
 
 ```
 帮我找一张红色电话亭的图片
 ```
 
-Agent 应该：
+Agent 会：
 
 1. 抓 `https://commons.wikimedia.org/w/index.php?search=red%20telephone%20box&title=Special:MediaSearch&type=image`
 2. 从返回的 `Image candidates` 里挑一张
@@ -119,7 +124,7 @@ https://api.openverse.org/v1/images/?q=<关键词>&page_size=20
 
 ---
 
-## 已踩过的坑（这也是这个 skill 存在的主要价值）
+## 已踩过的坑（这也是这个项目存在的主要价值）
 
 ### `import_web_image` 只认"页面上真实出现过的 URL"
 
@@ -155,8 +160,6 @@ comfy_img2img(image="E:\\ai\\comfy UI\\output\\reference\\rem-01.jpg",
 
 实测：960×1466 的照片直接喂 `comfy_img2img`，35.9 秒出 784×1200 结果，无需转格式。
 
-支持的衔接方式：
-
 | 用途 | 工具 | 要点 |
 |---|---|---|
 | 换画风 / 保构图 | `comfy_img2img` | denoise 0.45–0.55 |
@@ -168,16 +171,14 @@ comfy_img2img(image="E:\\ai\\comfy UI\\output\\reference\\rem-01.jpg",
 ## 目录结构
 
 ```
-web-image-finder/
+image-scout/
 ├── SKILL.md            # 给 Agent 读的可执行指令（核心）
 ├── README.md           # 本文件，给人读
 ├── LICENSE             # MIT
 ├── CHANGELOG.md        # 版本记录
 └── examples/
-    └── README.md       # 实测案例与真实 URL
+    └── README.md       # 四个实测案例（真实 URL + 返回值）
 ```
-
-`SKILL.md` 是真正被 Agent 加载的部分，其余是给人看的。
 
 ---
 
@@ -206,6 +207,13 @@ web-image-finder/
 - Openverse 的部分图源（Flickr）需要两跳，慢
 - 不处理登录态、付费墙、验证码
 - 不保证图片的肖像权 / 商标权，商用需自行评估
+
+---
+
+## 贡献
+
+发现新的图源、踩到新的坑，欢迎开 issue 或 PR。
+最有价值的贡献是**失败案例**——某个站点为什么抓不到、换了什么办法绕过去。
 
 ---
 

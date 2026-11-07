@@ -2,6 +2,24 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.2.0] — 2026-11-07
+
+**面向可发现性的改版。**
+
+### 变更
+
+- 仓库更名为 **`image-scout`**（原 `web-image-finder`）。GitHub 会保留旧地址的重定向。
+  技能文件内部的注册名仍为 `web-image-finder`，不影响已安装的客户端。
+- README 全面重写：新增 tagline、4 个 shields 徽章、30 秒上手、贡献指南
+- 收紧开头结构：`为什么` → `核心链路` → `上手`，让人三屏内能判断要不要用
+
+### 新增
+
+- GitHub topics（12 个）：`ai-agent`、`image-search`、`mcp`、`skill`、`claude`、
+  `llm-tools`、`agent-tools`、`web-scraping`、`image-download`、`wikimedia`、
+  `openverse`、`zero-dependencies`
+- 英文 description，关键词前置，便于搜索命中
+
 ## [1.1.0] — 2026-11-07
 
 **从"内部笔记"升级为可开源技能包。**
